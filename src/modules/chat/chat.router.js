@@ -9,7 +9,7 @@ router.get('/ovo/:destId',auth(),asyncHandler(chatcontroller.getchat))
 router.get('/allchats',auth(),asyncHandler(chatcontroller.getUserchats))
 router.post('/group',auth(),asyncHandler(chatcontroller.creatgroup))
 router.put('/group/:chatId',auth(),asyncHandler(chatcontroller.renameGroup))
-router.put('/addgroup/:chatId/:userId',auth(),asyncHandler(chatcontroller.addUsertoGroup))
+router.post('/addgroup/:chatId/:userId',auth(),asyncHandler(chatcontroller.addUsertoGroup))
 router.delete('/remove/:chatId/:userId',auth(),asyncHandler(chatcontroller.removeUserfromGroup))
 
 

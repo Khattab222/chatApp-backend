@@ -5,7 +5,10 @@ import chatModel from './../../../Db/models/ChatModel.js';
 
 export const sendMessage = async (req,res,next) => {
   const {messageText,destId} = req.body;
-
+  if (!messageText) {
+    return next(new Error('invalid message or destid',{cause:404}))
+    
+  }
   const destuser = await userModel.findById({_id:destId});
   if (!destuser) {
     return next(new Error('invalid user',{cause:404}))
@@ -17,14 +20,16 @@ export const sendMessage = async (req,res,next) => {
     ]
   }).populate([
     {
-        path:'POne'
+        path:'POne',
+        select:'-password'
     },
     {
-        path:'PTwo'
+        path:'PTwo',
+        select:'-password'
     },
   ])
   if (!chat) {
-    const chat = await chatModel.create({
+    let chat = await chatModel.create({
         POne : req.user._id,
         PTwo : destId,
         messages : [{
@@ -32,12 +37,16 @@ export const sendMessage = async (req,res,next) => {
             to:destId,
             messageText
         }]
-    }).populate([
+    })
+
+    chat = await chat.populate([
       {
-          path:'POne'
+          path:'POne',
+          select:'-password'
       },
       {
-          path:'PTwo'
+          path:'PTwo',
+          select:'-password'
       },
     ])
     //// socket emit here //// 
@@ -51,14 +60,11 @@ export const sendMessage = async (req,res,next) => {
   await chat.save();
 // socket emit here /////
   return res.status(200).json({message:'done',chat})
-
-
 }
 
 // get user chats 
 export const getUserchats = async(req,res,next)=>{
  
-
 
   const chats = await chatModel.find({
       $or:[
@@ -73,6 +79,9 @@ export const getUserchats = async(req,res,next)=>{
       },
       {
           path:'PTwo'
+      },
+      {
+          path:'groupUsers'
       },
     ])
     return res.status(200).json({message:'done',chats})
