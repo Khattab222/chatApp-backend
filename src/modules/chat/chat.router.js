@@ -5,6 +5,7 @@ import { asyncHandler } from '../../utils/errorhandling.js';
 const router = Router()
 
 router.post('/',auth(),asyncHandler(chatcontroller.sendMessage))
+router.post('/access/:destId',auth(),asyncHandler(chatcontroller.accessChat))
 router.get('/ovo/:destId',auth(),asyncHandler(chatcontroller.getchat))
 router.get('/allchats',auth(),asyncHandler(chatcontroller.getUserchats))
 router.post('/group',auth(),asyncHandler(chatcontroller.creatgroup))

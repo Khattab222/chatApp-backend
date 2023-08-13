@@ -3,6 +3,34 @@ import userModel from './../../../Db/models/userModel.js';
 import chatModel from './../../../Db/models/ChatModel.js';
 
 
+export const accessChat = async (req,res,next) => {
+  const {destId} = req.params;
+  
+  const destuser = await userModel.findById({_id:destId});
+  if (!destuser) {
+    return next(new Error('invalid user Id',{cause:404}))
+  }
+
+ 
+    let chat = await chatModel.create({
+        POne : req.user._id,
+        PTwo : destId,
+    })
+
+    chat = await chat.populate([
+      {
+          path:'POne',
+          select:'-password'
+      },
+      {
+          path:'PTwo',
+          select:'-password'
+      },
+    ])
+
+    return res.status(201).json({message:'done',chat})
+
+}
 export const sendMessage = async (req,res,next) => {
   const {messageText,destId} = req.body;
   if (!messageText) {
