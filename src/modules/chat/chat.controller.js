@@ -35,30 +35,89 @@ export const accessChat = async (req,res,next) => {
         PTwo : destId,
     })
 
-
-    return res.status(201).json({message:'done',newChat})
+await newChat.populate([
+  {
+      path:'POne',
+      select:'-password'
+  },
+  {
+      path:'PTwo',
+      select:'-password'
+  },
+])
+    return res.status(201).json({message:'done',chat})
 
 }
 
 
 
 
+// export const sendMessage = async (req,res,next) => {
+//   const {messageText,destId} = req.body;
+//   if (!messageText) {
+//     return next(new Error('invalid message or destid',{cause:404}))
+    
+//   }
+//   const destuser = await userModel.findById({_id:destId});
+//   if (!destuser) {
+//     return next(new Error('invalid user',{cause:404}))
+//   }
+//   const chat = await chatModel.findOne({
+//     $or:[
+//         {POne:req.user._id,PTwo:destId},
+//         {POne:destId,PTwo:req.user._id},
+//     ]
+//   }).populate([
+//     {
+//         path:'POne',
+//         select:'-password'
+//     },
+//     {
+//         path:'PTwo',
+//         select:'-password'
+//     },
+//   ])
+//   if (!chat) {
+//     let chat = await chatModel.create({
+//         POne : req.user._id,
+//         PTwo : destId,
+//         messages : [{
+//             from:req.user._id,
+//             to:destId,
+//             messageText
+//         }]
+//     })
+
+//     chat = await chat.populate([
+//       {
+//           path:'POne',
+//           select:'-password'
+//       },
+//       {
+//           path:'PTwo',
+//           select:'-password'
+//       },
+//     ])
+//     //// socket emit here //// 
+//     return res.status(201).json({message:'new done',chat})
+//   }
+//   chat.messages.push({
+//     from:req.user._id,
+//     to:destId,
+//     messageText
+//   })
+//   await chat.save();
+// // socket emit here /////
+//   return res.status(200).json({message:'done',chat})
+// }
+
 export const sendMessage = async (req,res,next) => {
-  const {messageText,destId} = req.body;
+  const {messageText,chatId} = req.body;
   if (!messageText) {
-    return next(new Error('invalid message or destid',{cause:404}))
+    return next(new Error('invalid message ',{cause:404}))
     
   }
-  const destuser = await userModel.findById({_id:destId});
-  if (!destuser) {
-    return next(new Error('invalid user',{cause:404}))
-  }
-  const chat = await chatModel.findOne({
-    $or:[
-        {POne:req.user._id,PTwo:destId},
-        {POne:destId,PTwo:req.user._id},
-    ]
-  }).populate([
+  const chat = await chatModel.findOne({_id:chatId}).populate([
     {
         path:'POne',
         select:'-password'
@@ -67,39 +126,36 @@ export const sendMessage = async (req,res,next) => {
         path:'PTwo',
         select:'-password'
     },
-  ])
+  ]);
   if (!chat) {
-    let chat = await chatModel.create({
-        POne : req.user._id,
-        PTwo : destId,
-        messages : [{
-            from:req.user._id,
-            to:destId,
-            messageText
-        }]
-    })
-
-    chat = await chat.populate([
-      {
-          path:'POne',
-          select:'-password'
-      },
-      {
-          path:'PTwo',
-          select:'-password'
-      },
-    ])
-    //// socket emit here //// 
-    return res.status(201).json({message:'new done',chat})
+    return next(new Error('invalid chat id',{cause:404}))
   }
-  chat.messages.push({
-    from:req.user._id,
-    to:destId,
-    messageText
+
+  if (!chat.isGroupChat) {
+    chat.messages.push({
+      from:req.user._id,
+      to:chat.PTwo._id,
+      messageText
   })
+
   await chat.save();
-// socket emit here /////
-  return res.status(200).json({message:'done',chat})
+    //// socket emit here //// 
+    return res.status(200).json({message:'done',chat})
+  }
+
+
+
+  if (chat.isGroupChat) {
+    chat.messages.push({
+      from:req.user._id,
+      messageText
+  })
+
+  await chat.save();
+    //// socket emit here //// 
+    return res.status(200).json({message:'done',chat})
+  }
+
 }
 
 // get user chats 
@@ -145,13 +201,8 @@ export const getUserchats = async(req,res,next)=>{
 
 // get chat 
 export const getchat = async(req,res,next)=>{
-    const {destId}= req.params;
-    const chat = await chatModel.findOne({
-        $or:[
-            {POne:req.user._id,PTwo:destId},
-            {POne:destId,PTwo:req.user._id},
-        ]
-      }).populate([
+    const {chatId}= req.params;
+    const chat = await chatModel.findById(chatId).populate([
         {
             path:'POne'
         },
@@ -159,7 +210,7 @@ export const getchat = async(req,res,next)=>{
             path:'PTwo'
         },
       ])
-      return res.status(200).json({message:'done',chat})
+      return res.status(200).json({message:'donesssss',chat})
 
 }
 
