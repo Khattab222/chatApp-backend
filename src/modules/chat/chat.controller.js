@@ -11,26 +11,38 @@ export const accessChat = async (req,res,next) => {
     return next(new Error('invalid user Id',{cause:404}))
   }
 
+  const chat = await chatModel.findOne({
+    $or:[
+        {POne:req.user._id,PTwo:destId},
+        {POne:destId,PTwo:req.user._id},
+    ]
+  }).populate([
+    {
+        path:'POne',
+        select:'-password'
+    },
+    {
+        path:'PTwo',
+        select:'-password'
+    },
+  ])
+  if (chat) {
+    return res.status(200).json({message:'done',chat})
+  }
  
-    let chat = await chatModel.create({
+    let newChat = await chatModel.create({
         POne : req.user._id,
         PTwo : destId,
     })
 
-    chat = await chat.populate([
-      {
-          path:'POne',
-          select:'-password'
-      },
-      {
-          path:'PTwo',
-          select:'-password'
-      },
-    ])
 
-    return res.status(201).json({message:'done',chat})
+    return res.status(201).json({message:'done',newChat})
 
 }
+
+
+
+
 export const sendMessage = async (req,res,next) => {
   const {messageText,destId} = req.body;
   if (!messageText) {
@@ -94,13 +106,12 @@ export const sendMessage = async (req,res,next) => {
 export const getUserchats = async(req,res,next)=>{
  
 
-  const chats = await chatModel.find({
+  const vovchats = await chatModel.find({
       $or:[
           {POne:req.user._id},
           {PTwo:req.user._id},
           {groupUsers:{$in:req.user._id}},
-          {groupAdmin:req.user._id},
-      ]
+      ], $where: 'this.messages.length>0' 
     }).populate([
       {
           path:'POne'
@@ -111,7 +122,22 @@ export const getUserchats = async(req,res,next)=>{
       {
           path:'groupUsers'
       },
-    ])
+    ]).sort({ updatedAt: -1 })
+    const groupchats = await chatModel.find({
+      isGroupChat:true,
+          groupUsers:{$in:req.user._id},
+    }).populate([
+      {
+          path:'POne'
+      },
+      {
+          path:'PTwo'
+      },
+      {
+          path:'groupUsers'
+      },
+    ]).sort({ updatedAt: -1 })
+ const chats = [...vovchats,...groupchats]
     return res.status(200).json({message:'done',chats})
 
 }
