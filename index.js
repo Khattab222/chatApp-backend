@@ -31,8 +31,21 @@ app.use('/chat', allRouter.chatRouter)
 app.use(globalError)
 
 const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`));
-const io = new Server(server);
+const io = new Server(server,{
+    pingTimeout:60000,
+    cors:'*'
+});
 
 io.on('connection',socket =>{
-console.log(socket)
+console.log("connected to socket io");
+socket.on('setup',(userData) => {
+    socket.join(userData._id);
+    socket.emit('connected')
+})
+
+socket.on('joinchat',(room) =>{
+    socket.join(room);
+    console.log('user joined ' + room)
+})
+
 })
