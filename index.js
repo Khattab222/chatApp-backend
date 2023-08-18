@@ -37,15 +37,22 @@ const io = new Server(server,{
 });
 
 io.on('connection',socket =>{
-console.log("connected to socket io");
+// console.log("connected to socket io");
 socket.on('setup',(userData) => {
-    socket.join(userData._id);
-    socket.emit('connected')
+   
+    socket.emit('connected');
+  
 })
 
 socket.on('joinchat',(room) =>{
     socket.join(room);
-    console.log('user joined ' + room)
+    console.log(`joined to room ${room}`)
+    io.sockets.in(room).emit(`connectedRoom`,`u are in room ${room}`)
+
+})
+socket.on('newMessage',(newMessage) =>{
+
+  socket.in(newMessage._id).emit("recieveMessage",newMessage)
 })
 
 })

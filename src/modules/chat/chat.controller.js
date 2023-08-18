@@ -117,7 +117,7 @@ export const sendMessage = async (req,res,next) => {
     return next(new Error('invalid message ',{cause:404}))
     
   }
-  const chat = await chatModel.findOne({_id:chatId}).populate([
+  let chat = await chatModel.findOne({_id:chatId}).populate([
     {
         path:'POne',
         select:'-password'
@@ -153,6 +153,7 @@ export const sendMessage = async (req,res,next) => {
 
   await chat.save();
     //// socket emit here //// 
+    console.log({chat})
     return res.status(200).json({message:'done',chat})
   }
 
@@ -167,7 +168,7 @@ export const getUserchats = async(req,res,next)=>{
           {POne:req.user._id},
           {PTwo:req.user._id},
           {groupUsers:{$in:req.user._id}},
-      ], $where: 'this.messages.length>0' 
+      ], $where: 'this.messages.length>0' ,
     }).populate([
       {
           path:'POne'
@@ -179,6 +180,8 @@ export const getUserchats = async(req,res,next)=>{
           path:'groupUsers'
       },
     ]).sort({ updatedAt: -1 })
+
+
     const groupchats = await chatModel.find({
       isGroupChat:true,
           groupUsers:{$in:req.user._id},
@@ -193,7 +196,8 @@ export const getUserchats = async(req,res,next)=>{
           path:'groupUsers'
       },
     ]).sort({ updatedAt: -1 })
- const chats = [...vovchats,...groupchats]
+ const chatss = [...vovchats,...groupchats]
+ const chats = Array.from(new Set(chatss.map(JSON.stringify))).map(JSON.parse);
     return res.status(200).json({message:'done',chats})
 
 }
