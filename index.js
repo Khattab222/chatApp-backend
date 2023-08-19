@@ -46,13 +46,21 @@ socket.on('setup',(userData) => {
 
 socket.on('joinchat',(room) =>{
     socket.join(room);
-    console.log(`joined to room ${room}`)
+
     io.sockets.in(room).emit(`connectedRoom`,`u are in room ${room}`)
 
 })
 socket.on('newMessage',(newMessage) =>{
 
   socket.in(newMessage._id).emit("recieveMessage",newMessage)
+})
+
+
+socket.on('typing',(room) =>{
+    socket.in(room).emit('typing')
+})
+socket.on('stopTyping',(room) =>{
+    socket.in(room).emit('stopTyping')
 })
 
 })
