@@ -58,10 +58,10 @@ socket.on('newMessage',(newMessage) =>{
 
 
 socket.on('typing',(room) =>{
-    socket.in(room).emit('typing')
+    socket.in(room).emit('typing',room)
 })
 socket.on('stopTyping',(room) =>{
-    socket.in(room).emit('stopTyping')
+    socket.in(room).emit('stopTyping',room)
 })
 
 })

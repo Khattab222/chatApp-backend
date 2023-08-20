@@ -25,6 +25,10 @@ export const accessChat = async (req,res,next) => {
         path:'PTwo',
         select:'-password'
     },
+    {
+        path:'groupUsers',
+        select:'-password'
+    },
   ])
   if (chat) {
     return res.status(200).json({message:'done',chat})
@@ -42,6 +46,10 @@ await newChat.populate([
   },
   {
       path:'PTwo',
+      select:'-password'
+  },
+  {
+      path:'groupUsers',
       select:'-password'
   },
 ])
@@ -212,6 +220,9 @@ export const getchat = async(req,res,next)=>{
         },
         {
             path:'PTwo'
+        },
+        {
+            path:'groupUsers'
         },
       ])
       return res.status(200).json({message:'donesssss',chat})
