@@ -52,7 +52,10 @@ socket.on('joinchat',(room) =>{
 
 })
 socket.on('newMessage',(newMessage) =>{
-
+   let toRoom = newMessage.messages[newMessage.messages.length-1].to;
+    if (!newMessage.isGroupChat) {
+        socket.in(toRoom).emit("recieveMessage",newMessage)
+    }
   socket.in(newMessage._id).emit("recieveMessage",newMessage)
 })
 
@@ -62,6 +65,12 @@ socket.on('typing',(room) =>{
 })
 socket.on('stopTyping',(room) =>{
     socket.in(room).emit('stopTyping',room)
+})
+
+
+socket.off("setup",() =>{
+    console.log("leaving");
+    socket.leave(userData?._id)
 })
 
 })
