@@ -68,9 +68,12 @@ socket.on('stopTyping',(room) =>{
 })
 
 
-socket.off("setup",() =>{
-    console.log("leaving");
-    socket.leave(userData?._id)
-})
+ socket.on('leaveRoom', (room) => {
+    socket.leave(room);
+    console.log(`User left room: ${room}`);
+  });
+    socket.on('disconnect', () => {
+    console.log('A user disconnected');
+  });
 
 })
