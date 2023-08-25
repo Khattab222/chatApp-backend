@@ -11,7 +11,7 @@ export const accessChat = async (req,res,next) => {
     return next(new Error('invalid user Id',{cause:404}))
   }
 
-  const chat = await chatModel.findOne({
+  let chat = await chatModel.findOne({
     $or:[
         {POne:req.user._id,PTwo:destId},
         {POne:destId,PTwo:req.user._id},
@@ -34,12 +34,12 @@ export const accessChat = async (req,res,next) => {
     return res.status(200).json({message:'done',chat})
   }
  
-    let newChat = await chatModel.create({
+ chat = await chatModel.create({
         POne : req.user._id,
         PTwo : destId,
     })
 
-await newChat.populate([
+await chat.populate([
   {
       path:'POne',
       select:'-password'
@@ -53,6 +53,7 @@ await newChat.populate([
       select:'-password'
   },
 ])
+
     return res.status(201).json({message:'done',chat})
 
 }
