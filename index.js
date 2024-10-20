@@ -18,7 +18,9 @@ connectionDb()
 
 
 
-app.get('/', (req, res) => res.send('selcome to chat app'))
+app.get('/',(req,res,next) => {
+  return res.status(200).json({message:'welcome to chat app'})
+})
 app.use('/auth', allRouter.authRouter)
 app.use('/chat', allRouter.chatRouter)
 
@@ -28,6 +30,7 @@ app.use('/chat', allRouter.chatRouter)
  app.all('*', (req, res, next) => {
     res.send("In-valid Routing Plz check url  or  method")
 })
+
 app.use(globalError)
 
 const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`));
