@@ -10,7 +10,18 @@ const app = express()
 app.use(express.json())
 config({path:'./config/dev.env'})
 const port = process.env.PORT 
-app.use(cors({ origin: true }));
+
+
+app.use(async (req,res,next) => {
+
+await res.header('Access-Control-Allow-Origin','*');
+await res.header('Access-Control-Allow-Headers','*');
+await res.header('Access-Control-Allow-Private-Network','true');
+await res.header('Access-Control-Allow-Methods','PUT');
+
+next()
+}
+)
 
 
 
