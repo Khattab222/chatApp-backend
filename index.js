@@ -13,16 +13,16 @@ const port = process.env.PORT || 5000
 
 
 
-var whitelist = ['http://localhost:3000', 'http://example2.com']
+var whitelist = ['http://localhost:3000', 'http://localhost:5000']
 
 app.use(async (req,res,next) => {
-    if (!whitelist.includes(req.header('origin'))) {
-       return next(new Error('not allowed by cors',{cause:403})) 
-    }
-  // await res.header('Access-Control-Allow-Origin','*');
-  // await res.header('Access-Control-Allow-Headers','*');
-  // await res.header('Access-Control-Allow-Private-Network','true');
-  // await res.header('Access-Control-Allow-Methods','PUT');
+    // if (!whitelist.includes(req.header('origin'))) {
+    //    return next(new Error('not allowed by cors',{cause:403})) 
+    // }
+  await res.header('Access-Control-Allow-Origin','*');
+  await res.header('Access-Control-Allow-Headers','*');
+  await res.header('Access-Control-Allow-Private-Network','true');
+  await res.header('Access-Control-Allow-Methods','PUT');
 
   next()
 }
