@@ -9,17 +9,22 @@ import { Server } from 'socket.io';
 const app = express()
 app.use(express.json())
 config({path:'./config/dev.env'})
-const port = process.env.PORT 
+const port = process.env.PORT || 5000
 
+
+
+var whitelist = ['http://localhost:3000', 'http://example2.com']
 
 app.use(async (req,res,next) => {
+    if (!whitelist.includes(req.header('origin'))) {
+       return next(new Error('not allowed by cors',{cause:403})) 
+    }
+  // await res.header('Access-Control-Allow-Origin','*');
+  // await res.header('Access-Control-Allow-Headers','*');
+  // await res.header('Access-Control-Allow-Private-Network','true');
+  // await res.header('Access-Control-Allow-Methods','PUT');
 
-await res.header('Access-Control-Allow-Origin','*');
-await res.header('Access-Control-Allow-Headers','*');
-await res.header('Access-Control-Allow-Private-Network','true');
-await res.header('Access-Control-Allow-Methods','PUT');
-
-next()
+  next()
 }
 )
 
